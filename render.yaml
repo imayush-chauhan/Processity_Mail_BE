@@ -38,3 +38,10 @@ services:
         value: https://processity-mail-e7959.web.app
       - key: POLL_INTERVAL
         value: "10"
+
+      # Google returns extra/reordered OAuth scopes (adds `email` alongside the
+      # requested `userinfo.email` when `openid` is present). Let oauthlib tolerate
+      # that instead of raising "Scope has changed" — which surfaces as a 500 in
+      # the /auth/google/callback token exchange.
+      - key: OAUTHLIB_RELAX_TOKEN_SCOPE
+        value: "1"
