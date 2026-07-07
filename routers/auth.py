@@ -32,6 +32,10 @@ def _build_flow() -> Flow:
         client_config,
         scopes=config.GMAIL_SCOPES,
         redirect_uri=config.GOOGLE_REDIRECT_URI,
+        # Confidential client: the client_secret secures the token exchange, so PKCE is
+        # optional. Disable it — login and callback build separate Flow objects, so an
+        # auto-generated code_verifier would be lost between them ("Missing code verifier").
+        autogenerate_code_verifier=False,
     )
 
 
