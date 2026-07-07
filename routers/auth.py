@@ -56,8 +56,13 @@ def google_callback(request: Request):
         raise HTTPException(status_code=400, detail="Missing authorization code")
 
     flow = _build_flow()
-    flow.fetch_token(code=code)
-    gmail_client.save_credentials(flow.credentials)
+    try:
+        flow.fetch_token(code=code)
+        gmail_client.save_credentials(flow.credentials)
+    except Exception as e:
+        # Surface the real cause (scope mismatch, invalid_grant, redirect_uri_mismatch, ...)
+        # instead of an opaque 500 so OAuth failures are diagnosable at a glance.
+        raise HTTPException(status_code=400, detail=f"OAuth token exchange failed: {e}")
 
     if config.FRONTEND_URL:
         return RedirectResponse(f"{config.FRONTEND_URL}?connected=1")

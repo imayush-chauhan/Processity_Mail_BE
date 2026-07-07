@@ -8,6 +8,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Google returns extra/reordered scopes (adds `email` alongside userinfo.email when
+# `openid` is present); relax oauthlib's exact-scope check so /auth/google/callback
+# doesn't 500 with "Scope has changed". setdefault lets an explicit env var still win.
+os.environ.setdefault("OAUTHLIB_RELAX_TOKEN_SCOPE", "1")
+
 # --- Google OAuth / Gmail ---
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
