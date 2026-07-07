@@ -1,0 +1,40 @@
+# Render Blueprint — deploys the Processity AI Mail FastAPI backend.
+# Docs: https://render.com/docs/blueprint-spec
+# Usage: Render Dashboard → New → Blueprint → connect this repo. Render reads
+# this file, then prompts for the secret env vars marked `sync: false`.
+services:
+  - type: web
+    name: processity-mail-api
+    runtime: python
+    plan: free
+    region: oregon
+    branch: master
+    buildCommand: pip install -r requirements.txt
+    # Bind Render's injected $PORT (do NOT hardcode 10000).
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      # Pin the interpreter to match local dev (3.11.4).
+      - key: PYTHON_VERSION
+        value: "3.11.4"
+
+      # ---- Secrets: enter these in the Render dashboard. sync:false keeps them out of git. ----
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # After the first deploy you'll know the service URL. Set this to
+      #   https://<this-service>.onrender.com/auth/google/callback
+      # and add the SAME URL to the Google OAuth client's Authorized redirect URIs.
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+
+      # ---- Wire to the deployed Flutter frontend (Firebase Hosting) ----
+      - key: CORS_ORIGINS
+        value: https://processity-mail-e7959.web.app
+      - key: FRONTEND_URL
+        value: https://processity-mail-e7959.web.app
+      - key: POLL_INTERVAL
+        value: "10"
